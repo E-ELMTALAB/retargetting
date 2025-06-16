@@ -340,6 +340,94 @@ client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
 # Regex pattern for matching tokens of the form "16 digits-UPPER(4)-alphanumeric(10)"
 TOKEN_REGEX = re.compile(r"\b\d{16}-[A-Z]{4}-[A-Za-z0-9]{10}\b")
 
+# Raw text containing all pro tokens. Emojis or other characters are ignored
+# when extracting the actual token codes.
+PRO_TOKEN_TEXT = """
+2606845602987120-GKDC-APNSXrFcY4
+8759542835340066-VNBN-6rfsB4nahB
+3564237201180100-JPHQ-xc47juSP5q
+5299081103973474-OEFZ-fxDNA7BN1t
+4903702579618296-HNEX-sEW3CSS65r
+6743988494242780-THEC-J9Oohbxyxp
+1590034857282660-TCNK-ifUaETG59y
+5165443319952067-FGQN-VaSxCrwFKn
+8923071509122152-VHDM-9vCQevlqgj
+7259723523344437-MTLF-qWHjjVphbt
+4884381569745005-YNXA-LHQ2ADkYbF
+0165629598886300-WGIA-Zmeb7g3k9Y
+5476499257851591-FTFE-VkquyW9ch8
+0276550826587323-KVCV-s8eUGJSU94
+7406739034024743-ZKGQ-1YliZ2s1zW
+4818005817618342-WWEX-ytZoLQqjaK
+2968637985684351-HVGV-rUJ5rTaUvs
+2382685522168235-QEGN-ImeRnzgEVT
+7759732269883426-LLMS-8bp6r0mIis
+6741369176776209-SFIM-QC76362dZs
+0292400388768987-DKNV-ah2tRg0G57
+0864456066913280-BKIW-ZqJoKISngE
+2082261912107523-OOAT-nH6dwh1naw
+0040290856203970-HBBS-nbEFnJKscN
+2536421986958447-GIKV-f7VWpYVNvF
+0501714523881479-YKUE-KA0RJPJ3qV
+3686196775364193-VSSM-YPg7VOmlnI
+0079582434123596-NGYQ-lp2TxnOOR3
+2290880371280850-SAMR-3wxYhbNFZ7
+6536569504816329-IKLH-rr4Ay08DxT
+7041379799600597-YWOA-zDjZsMYjku
+7223525093398195-JKUK-vTHJ3Mh8H0
+5194596311814809-XDME-DG2ATKA3O6
+5813452812155599-MFIL-KaXsWQhiOp
+1323728246578017-MCQS-98RbHqLJkK
+7691340830492473-GXPY-Cr8qX2OGqi
+6821888327757537-CNTO-KqJxfcFsTI
+4048584590051544-FDOE-BEqcttWCH7
+4458138228497065-BLSA-XQSkLzMQqb
+6712951251051384-PTJZ-73tpd6pNbW
+4715187030161628-SESD-DiDIOjbCgj
+8590958079479365-DUGN-g9AQ9ORdh7
+9210718441522872-ZFYB-XL1NJwc1Ih
+1126110121053399-TDJK-dkx5e32w3e
+4757920581646868-OMOX-5kgy8KoRSZ
+5219916871362168-JLNS-Z5Ws0QaHpa
+1103174843221717-IVVS-XuKSiqrpwK
+1136685973278133-QQMR-CKeDluuMPJ
+9661690312706065-UEXP-gArwMPcPQ0
+4410435517565992-ZJSA-5wWut3UMnZ
+2032498605066887-MTXQ-6yv2PXD0sV
+4307621243955550-KPAU-on7iIFZb1D
+7438816760980859-WTND-EzM06UjXTq
+6633752388355610-VAGA-uy0QNHAsuE
+0701063133294323-DYPV-zNjOgHHGFX
+9164581234140959-IIAZ-kWpTXBVpHx
+8755907915147336-MLFY-26HZ6TTxYr
+9207843571854197-VFAR-MixtTIEPHT
+4218961503031924-MUUG-p4BhNIpuNd
+6723191906248528-RGUX-V8zsCsCwni
+8115509310209974-JKCF-0wjwr55wTK
+2049036048868982-EUIE-2A2m3BiSYm
+4087404103037533-TAQM-UOHb39ODLB
+9264322201890345-EDHA-3xQlBHZ6Iu
+3835143338610104-GYNL-Te9YAChv3g
+5989641314703742-ZHDT-yIZoCNwWbv
+8211735653789756-LGYT-kygApvbFVM
+9733009683118742-UASS-W2pJCkKfCQ
+7916343732836893-VEHI-qrUk1HHog0
+9742795766876535-WUQK-NbjJeKY4Fe
+9429661863365697-NSVM-rKrMRAXnNP
+3424581941471969-BGXF-MeZijGgFB8
+5937989531334689-UNCK-ruDvh75bj0
+1884253701041638-LJWD-eIkfh2SoLt
+5573190781343112-BPDV-zXzgpDuCgN
+8251755089936985-EOHB-qttW4qrj3r
+7076005958853214-SIHQ-O5Q3R2TCBJ
+5980767719181916-EEDG-ZBQWDMihud
+6377972276494836-IPZM-uB8e20y4FH
+8024873680849777-URLG-JUjC5FUfOs
+"""
+
+# Extract cleaned list of pro tokens from the text
+PRO_TOKENS = TOKEN_REGEX.findall(PRO_TOKEN_TEXT)
+
 
 def get_sent_user_ids():
     try:
@@ -375,6 +463,38 @@ async def has_token(user, max_messages=100):
     return False
 
 
+async def has_pro_token(user, max_messages=100):
+    """Check chat messages for the phrase 'pro token' and verify any found token
+    against the list of known PRO_TOKENS."""
+    found_pro_phrase = False
+    tokens_in_chat = []
+    try:
+        async for message in client.iter_messages(user.id, limit=max_messages):
+            if message.text:
+                if 'pro token' in message.text.lower():
+                    found_pro_phrase = True
+                match = TOKEN_REGEX.search(message.text)
+                if match:
+                    tokens_in_chat.append(match.group(0))
+    except Exception as e:
+        print(
+            f"Error while scanning for pro tokens in chat with user {user.username or user.id}: {e}"
+        )
+        return False
+
+    if found_pro_phrase:
+        for token in tokens_in_chat:
+            if token in PRO_TOKENS:
+                chat_name = (
+                    user.username
+                    or f"{(user.first_name or '')} {(user.last_name or '')}".strip()
+                    or str(user.id)
+                )
+                print(f"Found pro token '{token}' in chat with '{chat_name}'")
+                return True
+    return False
+
+
 async def already_has_keyword(user, keywords, max_messages=100):
     """
     Check whether the chat with 'user' contains any of the specified 'keywords'.
@@ -386,16 +506,21 @@ async def already_has_keyword(user, keywords, max_messages=100):
     if keywords == "NOTHING":
         return True
 
-    # Split on commas and strip whitespace
+    # Split on commas and prepare uppercase versions for easier comparison
     keyword_list = [k.strip() for k in keywords.split(",")]
+    keyword_list_upper = [k.upper() for k in keyword_list]
 
-    # If "TOKEN" is one of the requested checks, run the token‐search routine first
-    if "TOKEN" in keyword_list:
+    # Check for special keywords triggering token searches
+    if "PRO TOKEN" in keyword_list_upper:
+        if await has_pro_token(user, max_messages=max_messages):
+            return True
+
+    if "TOKEN" in keyword_list_upper:
         if await has_token(user, max_messages=max_messages):
             return True
 
-    # Build a list of literal keywords (exclude the special "TOKEN" token)
-    literal_keywords = [k for k in keyword_list if k != "TOKEN"]
+    # Build a list of literal keywords (excluding the special token directives)
+    literal_keywords = [k for k in keyword_list if k.upper() not in ("TOKEN", "PRO TOKEN")]
     if not literal_keywords:
         # No other keywords to check—if "TOKEN" wasn't found, return False
         return False
