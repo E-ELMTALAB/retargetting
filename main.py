@@ -178,7 +178,7 @@
 #                 message.text = message.text.replace("[ID]", str(uuid.uuid4()))
 #             print(message.text)
 
-#             # Send the message
+#                         # Send the message
 #             await send_message_to_user(user, message)
 
 #         # Log the user as successfully sent
@@ -320,6 +320,29 @@ def update_operation_flag(flag):
     cursor.close()
     conn.close()
 
+
+def log_user_info(user):
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=DictCursor)
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO telegram_users (chat_id, first_name, last_name, username)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (chat_id) DO UPDATE
+        SET first_name = EXCLUDED.first_name,
+            last_name = EXCLUDED.last_name,
+            username = EXCLUDED.username
+        """,
+        (
+            user.id,
+            getattr(user, 'first_name', None),
+            getattr(user, 'last_name', None),
+            getattr(user, 'username', None),
+        ),
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
 # Fetch settings from the database
 settings = get_database_settings()
 
@@ -1302,6 +1325,7 @@ async def send_message_to_user(user, message):
             print(f"No content to send for message ID {message.id}. Skipping.")
 
         # Delay between sending each message to reduce flood risk
+        log_user_info(user)
         await asyncio.sleep(MESSAGE_SEND_DELAY)
 
     except errors.FloodWaitError as e:
@@ -1332,10 +1356,9 @@ async def send_messages_to_user(user, messages):
                 message.text = message.text.replace("[ID]", str(uuid.uuid4()))
             if message.text:
                 print(message.text)
-
             # Send the message
-            # await send_message_to_user(user, message)
-
+            await send_message_to_user(user, message)
+            log_user_info(user)
         # Log the user as successfully sent
         log_sent_user(user.id)
     except Exception as e:
